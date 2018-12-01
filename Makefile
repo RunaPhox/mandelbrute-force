@@ -1,2 +1,2 @@
 all: main.cpp
-	g++ main.cpp -Wall -Wextra -Werror -pedantic -std=c++17 -ggdb3
+	g++ main.cpp -lSDL2 -Wall -Wextra -Werror -pedantic -std=c++17 -ggdb3
