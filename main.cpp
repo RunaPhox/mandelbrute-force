@@ -76,22 +76,23 @@ mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight)
 	double bright{};
 	int pix{};
 
+	int n{};
+
 	const int maxIt{100};
 
+	double a, b, ca, cb;
 	const double range{1.4};
 
 	for (int y{}; y < windowHeight; ++y) {
 		for (int x{}; x < windowWidth; ++x) {
-			double a{map(x, 0, windowWidth, -range, range)}; // map function here for x values
-			double b{map(y, 0, windowHeight, -range, range)}; // map function here for y values
+			a = map(x, 0, windowWidth, -range, range); // map function here for x values
+			b = map(y, 0, windowHeight, -range, range); // map function here for y values
 
-			double ca{a};
-			double cb{b};
-
-			int n{};
+			ca = a;
+			cb = b;
 
 			// calculate divergence
-			while (n < maxIt) {
+			for (n = 0; n < maxIt; ++n) {
 				double aa{a*a - b*b};
 				double bb{2 * a * b};
 
@@ -99,8 +100,6 @@ mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight)
 				b = bb + cb;
 
 				if (abs(a+b) > 16) break;
-
-				++n;
 			}
 
 
@@ -126,7 +125,7 @@ mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight)
 double
 map(double n, double start1, double stop1, double start2, double stop2)
 {
-	return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+	return (n - start1)/(stop1 - start1)*(stop2 - start2) + start2;
 }
 
 int
