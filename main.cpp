@@ -15,6 +15,7 @@ main()
 	// 3000 milliseconds
 	SDL_Delay(3000);
 
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
 }
