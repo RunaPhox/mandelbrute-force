@@ -4,22 +4,60 @@
 const int WIDTH{1280};
 const int HEIGHT{720};
 
-SDL_Window *window;
+bool init(SDL_Window **window, std::string windowTitle, int windowWidth, int windowHeight);
+void close(SDL_Window **window);
+
+
+bool
+init(SDL_Window **window, std::string windowTitle, int windowWidth, int windowHeight)
+{
+	SDL_Init(SDL_INIT_VIDEO);
+
+	*window = SDL_CreateWindow(
+		windowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED, windowWidth, windowHeight, SDL_WINDOW_SHOWN
+	);
+
+	if (!*window) {
+		std::cout << "could not create window. SDL Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+void
+close(SDL_Window **window)
+{
+	SDL_DestroyWindow(*window);
+	SDL_Quit();
+}
 
 int
 main()
 {
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Window* window;
 
-	window = SDL_CreateWindow("title", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
-	if (!window) {
-		std::cout << "could not create window. SDL Error: " << SDL_GetError() << std::endl;
+	if (!init(&window, "title", WIDTH, HEIGHT)) {
+		std::cout << "could not initialize SDL" << std::endl;
+		return 1;
 	}
 
-	// 3000 milliseconds
-	SDL_Delay(3000);
+	bool quit{};
+	SDL_Event evnt;
+	while (!quit) {
+		while (SDL_PollEvent(&evnt)) {
+			switch (evnt.type) {
+				case SDL_QUIT:
+					quit = true;
+					break;
+				default:
+					break;
+			}
+		}
+	}
 
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	close(&window);
+
 	return 0;
 }
