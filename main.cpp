@@ -1,9 +1,10 @@
 #include <SDL2/SDL.h>
-#include <math.h>
+#include <cmath>
 #include <iostream>
+#include <string>
 
-const int WIDTH{1280};
-const int HEIGHT{720};
+const int WIDTH{200};
+const int HEIGHT{200};
 
 bool init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
           std::string windowTitle, int windowWidth, int windowHeight);
@@ -14,8 +15,7 @@ double map(double value, int high1, int low1, int low2, int high2);
 
 
 bool
-init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
-     std::string windowTitle, int windowWidth, int windowHeight)
+init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture, std::string windowTitle, int windowWidth, int windowHeight)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) == -1) {
 		std::cout << "SDL initialization failed! SDL Error: "
@@ -116,6 +116,8 @@ mandelbrute(int *rgbaPixelBuffer, int windowWidth, int windowHeight)
 			rgbaPixelBuffer[pix]     = bright;
 			rgbaPixelBuffer[pix + 1] = bright;
 			rgbaPixelBuffer[pix + 2] = bright;
+			rgbaPixelBuffer[pix + 3] = 0xff;
+
 			std::cout << "asign to pixels done" << std::endl;
 		}
 	}
@@ -136,7 +138,6 @@ main()
 	SDL_Texture*  texture;
 
 	if (!init(&window, &renderer, &texture, "Mandelbrute Force", WIDTH, HEIGHT)) {
-		std::cout << "could not initialize SDL" << std::endl;
 		close(&window, &renderer, &texture);
 
 		return 1;
