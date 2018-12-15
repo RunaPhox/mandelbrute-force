@@ -1,5 +1,5 @@
 #include <SDL2/SDL.h>
-
+#include <math.h>
 #include <iostream>
 
 const int WIDTH{1280};
@@ -8,7 +8,7 @@ const int HEIGHT{720};
 bool init(SDL_Window **window, std::string windowTitle, int windowWidth, int windowHeight);
 void close(SDL_Window **window);
 
-void mandelbrute();
+void mandelbrute(int windowWidth, int windowHeight);
 double map(double value, int high1, int low1, int low2, int high2);
 
 
@@ -60,9 +60,11 @@ mandelbrute(int windowWidth, int windowHeight)
 	double realSqrt{};
 	double imagSqrt{};
 
+	int n{};
+
 	for (int y{}; y < windowHeight; ++y) {
 
-		imagPart = map(y, 0, windowHeight , -2, 2); // map function here for y values
+		imagPart = map(y, 0, windowHeight, -2, 2); // map function here for y values
 		origImagPart = imagPart;
 
 		for (int x{}; x < windowWidth; ++x) {
@@ -70,18 +72,19 @@ mandelbrute(int windowWidth, int windowHeight)
 			origRealPart = realPart;
 
 			// calculate divergence
-			for (int num{}; num < 100; ++num) {
+			for (int num{}; num < 100 and abs(realSqrt+imagSqrt)<=16; ++num) {
 				realSqrt = realPart*realPart - imagPart*imagPart;
 				imagSqrt = 2 * realPart * imagPart;
 
 				realPart = realSqrt + origRealPart;
 				imagPart = imagSqrt + origImagPart;
+				n=num;
 			}
 			
-			if (num == 100) {
+			if (n == 100) {
 				bright = 0;
 			} else {
-				bright = map(num, 0, 100, 0, 1); // map function here for brigth values
+				bright = map(n, 0, 100, 0, 1); // map function here for brigth values
 				bright = map(sqrt(bright), 0, 1, 0, 255);
 			}
 			
