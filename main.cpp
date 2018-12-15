@@ -102,13 +102,12 @@ mandelbrute(int *rgbaPixelBuffer, int windowWidth, int windowHeight)
 
 				realPart = realSqrt + origRealPart;
 				imagPart = imagSqrt + origImagPart;
-				n=num;
 			}
 			
-			if (n == 100) {
+			if (num == 100) {
 				bright = 0;
 			} else {
-				bright = map(n, 0, 100, 0, 1); // map function here for brigth values
+				bright = map(num, 0, 100, 0, 1); // map function here for brigth values
 				bright = map(sqrt(bright), 0, 1, 0, 255);
 			}
 
