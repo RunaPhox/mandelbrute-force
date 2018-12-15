@@ -60,7 +60,7 @@ mandelbrute(int windowWidth, int windowHeight)
 	double realSqrt{};
 	double imagSqrt{};
 
-	for (int y = 0; y < windowHeight; ++y) {
+	for (int y{}; y < windowHeight; ++y) {
 		imagPart = map(y,0,HEIGHT,-2,2); // map function here for y values
 		origImagPart = imagPart;
 
@@ -100,7 +100,7 @@ main()
 {
 	SDL_Window* window;
 
-	if (!init(&window, "title", WIDTH, HEIGHT)) {
+	if (!init(&window, "Mandelbrute Force", WIDTH, HEIGHT)) {
 		std::cout << "could not initialize SDL" << std::endl;
 		return 1;
 	}
