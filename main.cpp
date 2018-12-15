@@ -5,15 +5,17 @@
 const int WIDTH{1280};
 const int HEIGHT{720};
 
-bool init(SDL_Window **window, std::string windowTitle, int windowWidth, int windowHeight);
-void close(SDL_Window **window);
+bool init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
+          std::string windowTitle, int windowWidth, int windowHeight);
+void close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture);
 
-void mandelbrute();
+void mandelbrute(int *rgbaPixelBuffer, int windowWidth, int windowHeight);
 double map(double value, int high1, int low1, int low2, int high2);
 
 
 bool
-init(SDL_Window **window, std::string windowTitle, int windowWidth, int windowHeight)
+init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
+     std::string windowTitle, int windowWidth, int windowHeight)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) == -1) {
 		std::cout << "SDL initialization failed! SDL Error: "
@@ -34,20 +36,42 @@ init(SDL_Window **window, std::string windowTitle, int windowWidth, int windowHe
 		return false;
 	}
 
+	*renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
+	if (!*renderer) {
+		std::cout << "could not create renderer. SDL Error: "
+		          << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	*texture = SDL_CreateTexture(
+		*renderer,
+		SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_STATIC,
+		windowWidth, windowHeight
+	);
+
+	if (!*texture) {
+		std::cout << "could not create texture. SDL Error: "
+		          << SDL_GetError() << std::endl;
+		return false;
+	}
+
 	return true;
 }
 
 void
-close(SDL_Window **window)
+close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture)
 {
 	// destroy each object only if it was successfully created
+	if (*texture) SDL_DestroyTexture(*texture);
+	if (*renderer) SDL_DestroyRenderer(*renderer);
 	if (*window) SDL_DestroyWindow(*window);
 
 	SDL_Quit();
 }
 
 void
-mandelbrute(int windowWidth, int windowHeight)
+mandelbrute(int *rgbaPixelBuffer, int windowWidth, int windowHeight)
 {
 	double bright{};
 
@@ -69,8 +93,10 @@ mandelbrute(int windowWidth, int windowHeight)
 			realPart = map(x, 0, windowWidth, -2, 2); // map function here for x values
 			origRealPart = realPart;
 
+			int num{};
+
 			// calculate divergence
-			for (int num{}; num < 100; ++num) {
+			for (num = 0; num < 100; ++num) {
 				realSqrt = realPart*realPart - imagPart*imagPart;
 				imagSqrt = 2 * realPart * imagPart;
 
@@ -84,11 +110,16 @@ mandelbrute(int windowWidth, int windowHeight)
 				bright = map(num, 0, 100, 0, 1); // map function here for brigth values
 				bright = map(sqrt(bright), 0, 1, 0, 255);
 			}
-			
-			/*Put Pixels code here*/
 
+			int pix{(x + y*windowWidth) * 4};
+
+			rgbaPixelBuffer[pix]     = bright;
+			rgbaPixelBuffer[pix + 1] = bright;
+			rgbaPixelBuffer[pix + 2] = bright;
+			std::cout << "asign to pixels done" << std::endl;
 		}
 	}
+	std::cout << "done" << std::endl;
 }
 
 double
@@ -100,15 +131,21 @@ map(double value, int high1, int low1, int low2, int high2)
 int
 main()
 {
-	SDL_Window* window;
+	SDL_Window*   window;
+	SDL_Renderer* renderer;
+	SDL_Texture*  texture;
 
-	if (!init(&window, "Mandelbrute Force", WIDTH, HEIGHT)) {
+	if (!init(&window, &renderer, &texture, "Mandelbrute Force", WIDTH, HEIGHT)) {
 		std::cout << "could not initialize SDL" << std::endl;
+		close(&window, &renderer, &texture);
+
 		return 1;
 	}
 
 	bool quit{};
 	SDL_Event evnt;
+
+	int pixelBuffer[WIDTH*HEIGHT*4];
 
 	while (!quit) {
 		while (SDL_PollEvent(&evnt)) {
@@ -120,9 +157,14 @@ main()
 					break;
 			}
 		}
+
+		mandelbrute(pixelBuffer, WIDTH, HEIGHT);
+		SDL_UpdateTexture(texture, NULL, pixelBuffer, WIDTH*sizeof(int));
+		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		SDL_RenderPresent(renderer);
 	}
 
-	close(&window);
+	close(&window, &renderer, &texture);
 
 	return 0;
 }
