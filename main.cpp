@@ -3,15 +3,15 @@
 #include <iostream>
 #include <string>
 
-const int WIDTH{200};
-const int HEIGHT{200};
+const int WIDTH{1000};
+const int HEIGHT{1000};
 
 bool init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
           std::string windowTitle, int windowWidth, int windowHeight);
 void close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture);
 
-void mandelbrute(int *rgbaPixelBuffer, int windowWidth, int windowHeight);
-double map(double value, int high1, int low1, int low2, int high2);
+void mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight);
+double map(double value, double high1, double low1, double low2, double high2);
 
 
 bool
@@ -45,7 +45,7 @@ init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture, std::s
 
 	*texture = SDL_CreateTexture(
 		*renderer,
-		SDL_PIXELFORMAT_ARGB8888,
+		SDL_PIXELFORMAT_ABGR8888,
 		SDL_TEXTUREACCESS_STATIC,
 		windowWidth, windowHeight
 	);
@@ -71,63 +71,62 @@ close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture)
 }
 
 void
-mandelbrute(int *rgbaPixelBuffer, int windowWidth, int windowHeight)
+mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight)
 {
 	double bright{};
+	int pix{};
 
-	double imagPart{};
-	double origImagPart{};
+	const int maxIt{100};
 
-	double realPart{};
-	double origRealPart{};
-
-	double realSqrt{};
-	double imagSqrt{};
+	const double range{1.4};
 
 	for (int y{}; y < windowHeight; ++y) {
-
-		imagPart = map(y, 0, windowHeight, -2, 2); // map function here for y values
-		origImagPart = imagPart;
-
 		for (int x{}; x < windowWidth; ++x) {
-			realPart = map(x, 0, windowWidth, -2, 2); // map function here for x values
-			origRealPart = realPart;
+			double a{map(x, 0, windowWidth, -range, range)}; // map function here for x values
+			double b{map(y, 0, windowHeight, -range, range)}; // map function here for y values
 
-			int num{};
+			double ca{a};
+			double cb{b};
+
+			int n{};
 
 			// calculate divergence
-			for (num = 0; num < 100 && abs(realSqrt+imagSqrt) <= 16; ++num) {
-				realSqrt = realPart*realPart - imagPart*imagPart;
-				imagSqrt = 2 * realPart * imagPart;
+			while (n < maxIt) {
+				double aa{a*a - b*b};
+				double bb{2 * a * b};
 
-				realPart = realSqrt + origRealPart;
-				imagPart = imagSqrt + origImagPart;
-			}
-			
-			if (num == 100) {
-				bright = 0;
-			} else {
-				bright = map(num, 0, 100, 0, 1); // map function here for brigth values
-				bright = map(sqrt(bright), 0, 1, 0, 255);
+				a = aa + ca;
+				b = bb + cb;
+
+				if (abs(a+b) > 16) break;
+
+				++n;
 			}
 
-			int pix{(x + y*windowWidth) * 4};
+
+			bright = 0;
+
+			if (n != maxIt) {
+				bright = map(
+					sqrt(map(n, 0, maxIt, 0, 1)),
+					0, 1, 0, 255
+				);
+			}
+
+			pix = (x + y*windowWidth) * 4;
 
 			rgbaPixelBuffer[pix]     = bright;
 			rgbaPixelBuffer[pix + 1] = bright;
 			rgbaPixelBuffer[pix + 2] = bright;
 			rgbaPixelBuffer[pix + 3] = 0xff;
-
-			std::cout << "asign to pixels done" << std::endl;
 		}
 	}
-	std::cout << "done" << std::endl;
 }
 
 double
-map(double value, int high1, int low1, int low2, int high2)
+map(double n, double start1, double stop1, double start2, double stop2)
 {
-	return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+	return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 }
 
 int
@@ -146,7 +145,7 @@ main()
 	bool quit{};
 	SDL_Event evnt;
 
-	int pixelBuffer[WIDTH*HEIGHT*4];
+	uint8_t pixelBuffer[WIDTH*HEIGHT*4];
 
 	while (!quit) {
 		while (SDL_PollEvent(&evnt)) {
@@ -160,7 +159,8 @@ main()
 		}
 
 		mandelbrute(pixelBuffer, WIDTH, HEIGHT);
-		SDL_UpdateTexture(texture, NULL, pixelBuffer, WIDTH*sizeof(int));
+
+		SDL_UpdateTexture(texture, NULL, pixelBuffer, WIDTH*sizeof(*pixelBuffer));
 		SDL_RenderCopy(renderer, texture, NULL, NULL);
 		SDL_RenderPresent(renderer);
 	}
