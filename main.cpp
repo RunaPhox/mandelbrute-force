@@ -11,7 +11,7 @@ main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
-	window = SDL_CreateWindow("title", WIDTH, HEIGHT, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("title", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
 	if (!window) {
 		std::cout << "could not create window. SDL Error: " << SDL_GetError() << std::endl;
 	}
