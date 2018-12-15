@@ -60,8 +60,8 @@ mandelbrute(int windowWidth, int windowHeight)
 	double realSqrt{};
 	double imagSqrt{};
 
-	for (int y = 0; y < windowHeight; ++y) {
-		imagPart = map(y,0,HEIGHT,-2,2); // map function here for y values
+	for (int y{}; y < windowHeight; ++y) {
+		imagPart = map(y,0,HEIGHT, -2, 2); // map function here for y values
 		origImagPart = imagPart;
 
 		for (int x{}; x < windowWidth; ++x) {
@@ -77,14 +77,17 @@ mandelbrute(int windowWidth, int windowHeight)
 				imagPart = imagSqrt + origImagPart;
 
 				if (abs(realSqrt+imagSqrt) > 16) break;
-
-				if (num == 100) {
-					bright = 0;
-				} else {
-					bright = map(num, 0, 100, 0, 1); // map function here for brigth values
-					bright = map(sqrt(bright), 0, 1, 0, 255);
-				}
 			}
+			
+			if (num == 100) {
+				bright = 0;
+			} else {
+				bright = map(num, 0, 100, 0, 1); // map function here for brigth values
+				bright = map(sqrt(bright), 0, 1, 0, 255);
+			}
+			
+			/*Put Pixels code here*/
+
 		}
 	}
 }
