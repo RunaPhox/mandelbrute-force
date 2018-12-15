@@ -33,6 +33,47 @@ close(SDL_Window **window)
 	SDL_Quit();
 }
 
+double mapping(double value, int high1, int low1, int low2, int high2)
+{
+	return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+}
+
+void
+mandelbrute()
+{
+    double brigth;
+    for (int y = 0; y < HEIGHT; ++y)
+    {
+        double imagPart = mapping(y,0,HEIGHT,-2,2); //map function here for y values
+        double origImagPart = imagPart;
+        for (int x = 0; x < WIDTH; ++x)
+        {
+            double realPart = mapping(x,0,WIDTH,-2,2); //map function here for x values
+            double origRealPart = realPart;
+
+            //Calcule divergence
+            for (int num = 0; num < 100; ++num)
+            {
+                realSqrt = realPart*realPart - imagPart*imagPart;
+                imagSqrt = 2 * realPart * imagPart;
+
+                realPart = realSqrt + origRealPart;
+                imagPart = imagSqrt + origImagPart;
+
+                if (abs(realSqrt+imagSqrt)>16) break;
+
+                if (num == 100)
+                    brigth = 0;
+                else
+                {
+                    brigth = mapping(num, 0, 100, 0, 1); //map function here for brigth values
+                    brigth = mapping(sqrt(brigth), 0, 1, 0, 255);
+                }
+            }
+        }
+    }
+}
+
 int
 main()
 {
