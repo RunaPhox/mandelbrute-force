@@ -6,16 +6,16 @@
 const int WIDTH{1000};
 const int HEIGHT{1000};
 
-bool init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
+bool init(SDL_Window **window, SDL_Renderer **renderer,
           std::string windowTitle, int windowWidth, int windowHeight);
-void close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture);
+void close(SDL_Window **window, SDL_Renderer **renderer);
 
 void mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight);
 double map(double value, double high1, double low1, double low2, double high2);
 
 
 bool
-init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture, std::string windowTitle, int windowWidth, int windowHeight)
+init(SDL_Window **window, SDL_Renderer **renderer, std::string windowTitle, int windowWidth, int windowHeight)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) == -1) {
 		std::cout << "SDL initialization failed! SDL Error: "
@@ -43,27 +43,13 @@ init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture, std::s
 		return false;
 	}
 
-	*texture = SDL_CreateTexture(
-		*renderer,
-		SDL_PIXELFORMAT_ABGR8888,
-		SDL_TEXTUREACCESS_STATIC,
-		windowWidth, windowHeight
-	);
-
-	if (!*texture) {
-		std::cout << "could not create texture. SDL Error: "
-		          << SDL_GetError() << std::endl;
-		return false;
-	}
-
 	return true;
 }
 
 void
-close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture)
+close(SDL_Window **window, SDL_Renderer **renderer)
 {
 	// destroy each object only if it was successfully created
-	if (*texture) SDL_DestroyTexture(*texture);
 	if (*renderer) SDL_DestroyRenderer(*renderer);
 	if (*window) SDL_DestroyWindow(*window);
 
@@ -77,10 +63,10 @@ mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight)
 
 	int n{};
 
-	const int maxIt{100};
+	const int maxIt{200};
 
 	double a, b, ca, cb;
-	const double range{1.4};
+	const double range{2.5};
 
 	for (int y{}; y < windowHeight; ++y) {
 		for (int x{}; x < windowWidth; ++x) {
@@ -111,7 +97,7 @@ mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight)
 				);
 			}
 
-			SDL_SetRenderDrawColor(*renderer, bright, bright, bright, 0xff);
+			SDL_SetRenderDrawColor(*renderer, bright*1.5, bright*2, bright/3, 0xff);
 			SDL_RenderDrawPoint(*renderer, x, y);
 		}
 	}
@@ -128,10 +114,9 @@ main()
 {
 	SDL_Window*   window;
 	SDL_Renderer* renderer;
-	SDL_Texture*  texture;
 
-	if (!init(&window, &renderer, &texture, "Mandelbrute Force", WIDTH, HEIGHT)) {
-		close(&window, &renderer, &texture);
+	if (!init(&window, &renderer, "Mandelbrute Force", WIDTH, HEIGHT)) {
+		close(&window, &renderer);
 
 		return 1;
 	}
@@ -154,7 +139,7 @@ main()
 		SDL_RenderPresent(renderer);
 	}
 
-	close(&window, &renderer, &texture);
+	close(&window, &renderer);
 
 	return 0;
 }
