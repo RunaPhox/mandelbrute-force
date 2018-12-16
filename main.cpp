@@ -10,7 +10,7 @@ bool init(SDL_Window **window, SDL_Renderer **renderer,
           std::string windowTitle, int windowWidth, int windowHeight);
 void close(SDL_Window **window, SDL_Renderer **renderer);
 
-void mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight);
+void mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight, double range);
 double map(double value, double high1, double low1, double low2, double high2);
 
 
@@ -57,7 +57,7 @@ close(SDL_Window **window, SDL_Renderer **renderer)
 }
 
 void
-mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight)
+mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight, double range)
 {
 	double bright{};
 
@@ -66,7 +66,6 @@ mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight)
 	const int maxIt{200};
 
 	double a, b, ca, cb;
-	const double range{2.5};
 
 	for (int y{}; y < windowHeight; ++y) {
 		for (int x{}; x < windowWidth; ++x) {
@@ -122,21 +121,40 @@ main()
 	}
 
 	bool quit{};
+	bool changed{true};
 	SDL_Event evnt;
 
+	double range{2};
+
 	while (!quit) {
-		while (SDL_PollEvent(&evnt)) {
-			switch (evnt.type) {
-				case SDL_QUIT:
-					quit = true;
-					break;
-				default:
-					break;
-			}
+		if (changed) {
+			mandelbrute(&renderer, WIDTH, HEIGHT, range);
+			SDL_RenderPresent(renderer);
+			changed = false;
 		}
 
-		mandelbrute(&renderer, WIDTH, HEIGHT);
-		SDL_RenderPresent(renderer);
+		SDL_WaitEvent(&evnt);
+		switch (evnt.type) {
+			case SDL_QUIT:
+				quit = true;
+				break;
+			case SDL_KEYDOWN:
+				switch (evnt.key.keysym.sym) {
+					case SDLK_KP_PLUS:
+						range -= 0.1;
+						changed = true;
+						break;
+					case SDLK_KP_MINUS:
+						range += 0.1;
+						changed = true;
+						break;
+					default:
+						break;
+				}
+				break;
+			default:
+				break;
+		}
 	}
 
 	close(&window, &renderer);
