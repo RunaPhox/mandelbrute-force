@@ -3,8 +3,8 @@
 #include <iostream>
 #include <string>
 
-const int WIDTH{1000};
-const int HEIGHT{1000};
+const int WIDTH{1080};
+const int HEIGHT{720};
 
 bool init(SDL_Window **window, SDL_Renderer **renderer,
           std::string windowTitle, int windowWidth, int windowHeight);
@@ -63,14 +63,15 @@ mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight, double r
 
 	int n{};
 
-	const int maxIt{200};
+	const int maxIt{1000};
+	int col{};
 
 	double a, b, ca, cb;
 
 	for (int y{}; y < windowHeight; ++y) {
 		for (int x{}; x < windowWidth; ++x) {
-			a = map(x, 0, windowWidth, -range, range); // map function here for x values
-			b = map(y, 0, windowHeight, -range, range); // map function here for y values
+			a = map(x, 0, windowWidth, -range, range/2); // map function here for x values
+			b = map(y, 0, windowHeight, -range, range)/2; // map function here for y values
 
 			ca = a;
 			cb = b;
@@ -90,13 +91,13 @@ mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight, double r
 			bright = 0;
 
 			if (n != maxIt) {
-				bright = map(
-					sqrt(map(n, 0, maxIt, 0, 1)),
-					0, 1, 0, 255
-				);
+				
+				bright = map(n, 0, maxIt, 0, 1);
 			}
 
-			SDL_SetRenderDrawColor(*renderer, bright*1.5, bright*2, bright/3, 0xff);
+			col = floor(map(sqrt(bright),0, 1, 0,  15500000));
+
+			SDL_SetRenderDrawColor(*renderer, (col >> 16) & 0xFF, (col >> 8) & 0xFF, col & 0xFF, 0xff);
 			SDL_RenderDrawPoint(*renderer, x, y);
 		}
 	}
