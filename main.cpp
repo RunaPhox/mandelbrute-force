@@ -10,7 +10,7 @@ bool init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture,
           std::string windowTitle, int windowWidth, int windowHeight);
 void close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture);
 
-void mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight);
+void mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight);
 double map(double value, double high1, double low1, double low2, double high2);
 
 
@@ -71,10 +71,9 @@ close(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture)
 }
 
 void
-mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight)
+mandelbrute(SDL_Renderer **renderer, int windowWidth, int windowHeight)
 {
 	double bright{};
-	int pix{};
 
 	int n{};
 
@@ -112,12 +111,8 @@ mandelbrute(uint8_t *rgbaPixelBuffer, int windowWidth, int windowHeight)
 				);
 			}
 
-			pix = (x + y*windowWidth) * 4;
-
-			rgbaPixelBuffer[pix]     = bright;
-			rgbaPixelBuffer[pix + 1] = bright;
-			rgbaPixelBuffer[pix + 2] = bright;
-			rgbaPixelBuffer[pix + 3] = 0xff;
+			SDL_SetRenderDrawColor(*renderer, bright, bright, bright, 0xff);
+			SDL_RenderDrawPoint(*renderer, x, y);
 		}
 	}
 }
@@ -144,8 +139,6 @@ main()
 	bool quit{};
 	SDL_Event evnt;
 
-	uint8_t pixelBuffer[WIDTH*HEIGHT*4];
-
 	while (!quit) {
 		while (SDL_PollEvent(&evnt)) {
 			switch (evnt.type) {
@@ -157,10 +150,7 @@ main()
 			}
 		}
 
-		mandelbrute(pixelBuffer, WIDTH, HEIGHT);
-
-		SDL_UpdateTexture(texture, NULL, pixelBuffer, WIDTH*sizeof(*pixelBuffer));
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		mandelbrute(&renderer, WIDTH, HEIGHT);
 		SDL_RenderPresent(renderer);
 	}
 
